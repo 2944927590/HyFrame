@@ -6,12 +6,20 @@ class HyAccountModel extends HyBaseModel{
 	
 	/**
 	 * 登录 
-	 * @param string $account
-	 * @return kvArr
+	 * @param string $account  array $forbid_roles
+	 * @return array
 	 */
-	public function login($account){
+	public function login($account,$forbid_roles){
 		$arr=$this->where(array('user_no'=>$account,'status'=>1))->field(true)->find();
-		if($arr)$arr['password']=$this->pwdDecrypt($arr['password'],C('CRYPT_KEY_PWD'));
+        if($arr && $forbid_roles){
+            $role_arr = explode(',',$arr['roles']);
+            foreach($forbid_roles as $k => $v ){
+                if(in_array($v,$role_arr)){
+                    return false;
+                }
+            }
+        }
+        if($arr) $arr['password'] = $this->pwdDecrypt($arr['password']);
 		return $arr;
 	}
 	/**
